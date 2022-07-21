@@ -1,0 +1,25 @@
+<%= link_to "ログアウト", destroy_user_session_path, method: :delete %><br>
+<h1>TEST</h1>
+<h2>モニタリングする授業</h2>
+<%= @focus_course.course_code %>: 
+<%= @focus_course.name %>
+<% @users.each do |user| %>
+    <ol>
+        <%= user.name %>
+    </ol>
+<% end %><br>
+
+<h2>授業一覧</h2>
+    <% @courses.each do |course| %>
+        <li>
+            <%= course.course_code %>:
+            <%= course.name %>
+            <%= link_to "削除", "courses/#{course.id}", method: :delete %><br>
+        </li>
+    <% end %><br>
+
+<%= button_to "授業を追加する", new_course_path, method: :get %><br>
+<%= button_to "モニタリング", events_path, method: :get %>
+
+
+

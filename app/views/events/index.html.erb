@@ -1,0 +1,8 @@
+<% @not_submitted_student.each do |student| %>
+    <li>
+        <%= student.name %>
+    </li>
+<% end %><br>
+提出:<%= @all_submitted_student %>人
+未提出:<%= @all_not_submitted_student %>人<br>
+<%= link_to "トップ", root_path, method: :get %>
