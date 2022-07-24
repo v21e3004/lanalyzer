@@ -19,9 +19,16 @@ class CoursesController < ApplicationController
   end
   
   def destroy
-     @course = Course.find(params[:id])
-     @course.destroy
-     redirect_to root_path
+    @course = Course.find(params[:id])
+    @course.destroy
+    redirect_to root_path
+  end
+  
+  def edit
+    current_user.courses.update_all(focus: false)
+    @course = Course.find(params[:id])
+    @course.update(focus: true)
+    redirect_to root_path
   end
   
   private

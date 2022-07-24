@@ -57,7 +57,7 @@ class EventsController < ApplicationController
     find_student = User.find_by(student_id: stid)
     
     # 学生，イベントを作成：ロールが学生かつ学生が未作成かつコースが作成済みかつ学生がコースにアクセスした時
-    if strole == "http://purl.imsglobal.org/vocab/lis/v2/membership#Learner" && find_student == nil && find_course != nil && access_course != nil
+    if strole == "http://purl.imsglobal.org/vocab/lis/v2/membership#Learner" && find_student.nil? && !find_course.nil? && !access_course.nil?
       # 学生を登録
       find_course.users.create(email: stemail, name: stname, password: stid, student_id: stid, role: "Student")
       # イベントを登録
@@ -65,7 +65,7 @@ class EventsController < ApplicationController
       Event.create(user_id: u_id.id, course_id: find_course.id, activity_access: access_time)
       puts "Student Created"
     # eventsの更新：ロールが学生かつ学生が作成済みかつコースが作成済みかつ学生がコースにアクセスした時
-    elsif strole == "http://purl.imsglobal.org/vocab/lis/v2/membership#Learner" && find_student != nil && find_course != nil && access_course != nil
+    elsif strole == "http://purl.imsglobal.org/vocab/lis/v2/membership#Learner" && !find_student.nil? && !find_course.nil? && !access_course.nil?
       # 提出時刻の更新：action#Submittedの時
       if caliper_event["data"][0]["action"] == "http://purl.imsglobal.org/vocab/caliper/v1/action#Submitted"
         find_student.events.update(submitted_time: access_time)

@@ -14,6 +14,7 @@
         <li>
             <%= course.course_code %>:
             <%= course.name %>
+            <%= link_to "モニタリング対象にする", "courses/#{course.id}/edit", method: :get %>
             <%= link_to "削除", "courses/#{course.id}", method: :delete %><br>
         </li>
     <% end %><br>
