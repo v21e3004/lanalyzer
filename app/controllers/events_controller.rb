@@ -33,29 +33,24 @@ class EventsController < ApplicationController
   def create
     # POSTされたCaliper Eventをパース
     caliper_event = JSON.parse(request.body.read)
-    
     # 変数に代入
     # 学生氏名
     stname = caliper_event["data"][0]["actor"]["name"]
-    
     # 統合認証ID取得
     stid = caliper_event["data"][0]["actor"]["name"].slice(0,8)
-    
     # 学生email
     stemail = stid + "@oita-u.ac.jp"
-    
     # ロール＝学生を取得
     strole = caliper_event["data"][0]["membership"]["roles"][0]
     
-    access_time = caliper_event["data"][0]["eventTime"]
+    activity_name = caliper_event["data"][0]["target"]["name"]
     
+    access_time = caliper_event["data"][0]["eventTime"]
     # DBからユーザがアクセスしたコースレコードを取得
     access_course = caliper_event["data"][0]["group"]["courseNumber"]
     find_course = Course.find_by(course_code: access_course)
-    
     # 学生が登録されているかどうか探す
     find_student = User.find_by(student_id: stid)
-    
     # 学生，イベントを作成：ロールが学生かつ学生が未作成かつコースが作成済みかつ学生がコースにアクセスした時
     if strole == "http://purl.imsglobal.org/vocab/lis/v2/membership#Learner" && find_student.nil? && !find_course.nil? && !access_course.nil?
       # 学生を登録
@@ -68,7 +63,7 @@ class EventsController < ApplicationController
     elsif strole == "http://purl.imsglobal.org/vocab/lis/v2/membership#Learner" && !find_student.nil? && !find_course.nil? && !access_course.nil?
       # 提出時刻の更新：action#Submittedの時
       if caliper_event["data"][0]["action"] == "http://purl.imsglobal.org/vocab/caliper/v1/action#Submitted"
-        find_student.events.update(submitted_time: access_time)
+        find_student.events.update(submitted_time: access_time, name: activity_name)
         puts "Update submitted_time"
       # アクセス時刻の更新：action#Submitted以外の時
       elsif caliper_event["data"][0]["action"] != "http://purl.imsglobal.org/vocab/caliper/v1/action#Submitted"
