@@ -31,6 +31,10 @@ class CoursesController < ApplicationController
     redirect_to root_path
   end
   
+  # def update
+  #   @activity = Event.update(name: name)
+  # end
+  
   private
     def course_params
         params.require(:course).permit(:course_code, :name, :start_time)

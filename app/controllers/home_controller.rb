@@ -4,5 +4,6 @@ class HomeController < ApplicationController
     @courses = current_user.courses.all
     @focus_course = current_user.courses.find_by(focus: true)
     @users = @focus_course.users.where(role: "Student")
+    @events = @focus_course.events.select(:name).distinct
   end
 end

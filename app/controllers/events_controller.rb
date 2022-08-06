@@ -43,8 +43,6 @@ class EventsController < ApplicationController
     # ロール＝学生を取得
     strole = caliper_event["data"][0]["membership"]["roles"][0]
     
-    activity_name = caliper_event["data"][0]["target"]["name"]
-    
     access_time = caliper_event["data"][0]["eventTime"]
     # DBからユーザがアクセスしたコースレコードを取得
     access_course = caliper_event["data"][0]["group"]["courseNumber"]
@@ -63,6 +61,7 @@ class EventsController < ApplicationController
     elsif strole == "http://purl.imsglobal.org/vocab/lis/v2/membership#Learner" && !find_student.nil? && !find_course.nil? && !access_course.nil?
       # 提出時刻の更新：action#Submittedの時
       if caliper_event["data"][0]["action"] == "http://purl.imsglobal.org/vocab/caliper/v1/action#Submitted"
+        activity_name = caliper_event["data"][0]["target"]["name"]
         find_student.events.update(submitted_time: access_time, name: activity_name)
         puts "Update submitted_time"
       # アクセス時刻の更新：action#Submitted以外の時
