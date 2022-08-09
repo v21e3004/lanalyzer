@@ -25,7 +25,8 @@ class CoursesController < ApplicationController
   end
   
   def edit
-    current_user.courses.update_all(focus: false)
+    # current_user.courses.update_all(focus: false)
+    Course.update_all(focus: false)
     @course = Course.find(params[:id])
     @course.update(focus: true)
     redirect_to root_path

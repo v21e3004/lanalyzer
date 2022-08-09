@@ -2,9 +2,9 @@ class EventsController < ApplicationController
   protect_from_forgery
   def index
     # ログインしている教師のコースのレコードを取得
-    @courses = current_user.courses.all
+    # @courses = current_user.courses.all
     # 上記のレコードでfocus: trueのレコードを取得
-    @focus_course = current_user.courses.find_by(focus: true)
+    @focus_course = Course.find_by(focus: true)
     # focus: trueであるコースに属している学生を取得
     @users = @focus_course.users.where(role: "Student")
     # 上記の学生で課題を提出している学生レコードを取得
