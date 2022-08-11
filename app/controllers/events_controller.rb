@@ -19,13 +19,13 @@ class EventsController < ApplicationController
     @all_student = @submitted_student.count + @not_submitted_student.count
     # すべての学生人数を３で割った時の商を取得
     # 例：４÷３＝1.333....の１を@divnum に代入
-    @divnum = @all_student.div(3)
+    @divnum = @all_student.div(3) * 2
     
-    # 1/3の学生が提出しているかどうかの処理
-    if @divnum <= @all_not_submitted_student
+    # 2/3の学生が提出しているかどうかの処理
+    if @divnum <= @all_submitted_student
       flash[:notice] = "メッセージが送信されました"
       # redirect_to root_path
-    elsif @divnum > @all_not_submitted_student
+    elsif @divnum > @all_submitted_student
       flash[:notice] = "メッセージは送信されませんでした"
     end
   end

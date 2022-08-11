@@ -18,3 +18,26 @@
 # end
 
 # Learn more: http://github.com/javan/whenever
+# Rails.rootを使用するために必要。なぜなら、wheneverは読み込まれるときにrailsを起動する必要がある
+require File.expand_path(File.dirname(__FILE__) + "/environment")
+
+# cronを実行する環境変数
+rails_env = ENV['RAILS_ENV'] || :development
+
+# cronを実行する環境変数をセット
+set :environment, rails_env
+
+# cronのログの吐き出し場所。ここでエラー内容を確認する
+set :output, "#{Rails.root}/log/cron.log"
+
+# １分ごとにarticle_state.rakeのchange_to_be_publishedを実行する
+every 1.minute do
+  rake "extract:student_extract"
+end
+
+every 5.minute do
+  rake "extract:reset_flag"
+end
+
+# bundle exec whenever --update-crontab
+# bundle exec whenever --clear-crontab
