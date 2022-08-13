@@ -11,6 +11,8 @@ class EventsController < ApplicationController
     @submitted_student = @users.joins(:events).where.not(events: {submitted_time: nil})
     # 課題を提出していない学生レコードを取得
     @not_submitted_student = @users.joins(:events).where(events: {submitted_time: nil})
+    # 学生が提出したアクティビティ名
+  
     # 課題を提出していない学生の人数を代入
     @all_not_submitted_student = @not_submitted_student.count
     # 課題を提出している学生の人数を代入
