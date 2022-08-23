@@ -11,67 +11,52 @@ namespace :extract do
     divnum = doubled.div(3)
     
     events.each_with_index do |event|
+      message = "他の学生は#{event.name}を提出済みです．取り組みましょう．"
       submit = users.joins(:events).where(events: {name: event.name})
       not_submit = users.joins(:events).where.not(events: {name: event.name}).or(users.joins(:events).where(events: {name: nil}))
       all_submit = submit.count
       all_not_submit = all_student - all_submit
       puts "・#{event.name}"
-      if divnum <= all_submit
+      if divnum <= all_submit && Flag.exists?(send: false)
+        puts "メッセージが送信されました"
         puts "提出:#{all_submit}人"
         puts "未提出:#{all_not_submit}人"
         puts "未提出者"
         not_submit.each_with_index do |user|
+          Rake::Task["extract:send_message"].invoke("#{user.student_id}", message, focus_course.name)
+          Rake::Task["extract:send_message"].reenable
           puts "#{user.name}"
+          # sleep 2
         end
-        if Flag.exists?(send: false)
-          puts "メッセージが送信されました"
-          Rake::Task["extract:send_message"].invoke
-        end
-      elsif divnum > all_submit
-      puts "提出:#{all_submit}人"
-      puts "未提出:#{all_not_submit}人"
+      else
+        puts "提出:#{all_submit}人"
+        puts "未提出:#{all_not_submit}人"
       end
     end
   end
   
-  task send_message: :environment do
+  task :send_message, [:student_id, :message, :focus_course] => :environment do |task, args|
     require 'net/http'
     require 'uri'
     require 'json'
-    # チャネルアクセストークン発行
-    body = "grant_type=" + URI.encode("client_credentials") + "&" + "client_id=1655422613" + "&" + "client_secret=2e0fb243bbcf66ccde62506615f280c2"
-    uri = URI.parse("https://api.line.me/v2/oauth/accessToken")
+    uri = URI.parse("http://3.89.178.10:8080/users/#{args.student_id}/messages")
     request = Net::HTTP::Post.new(uri)
-    request.content_type = "application/x-www-form-urlencoded"
-    request.body = body
-      req_options = {
-        use_ssl: uri.scheme == "https",
-      }
-    response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
-      http.request(request)
-    end
-    result = JSON.parse(response.body)
-    #render :json => result
-    #プッシュメッセージ送信
-    uri = URI.parse("https://api.line.me/v2/bot/message/push")
-    request = Net::HTTP::Post.new(uri)
-    request.content_type = "application/json"
-    request["Authorization"] = "Bearer " + result["access_token"]
+    request.content_type = "application/json;charaset=utf-8"
     request.body = JSON.dump({
-      "to" => "U570cf8973ed4c6ae2a4292bf8b997e54",
-        "messages" => [
-          {
-            "type" => "text",
-            "text" => "テスト"
-          }
-        ]
+      "message" => {
+        "title" => "#{args.focus_course}の通知",
+        "body" => "【#{args.focus_course}】#{args.message}",
+        "icon" => "/icon.png"
+      }
     })
+    
     req_options = {
       use_ssl: uri.scheme == "https",
     }
     response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
-          http.request(request)
+      http.request(request)
     end
+    
     flag = Flag.find(1)
     flag.update(send: true)
   end

@@ -1,35 +1,45 @@
 class EventsController < ApplicationController
   protect_from_forgery
+  require 'net/http'
+  require 'uri'
+  require 'json'
   def index
+    if params[:button1]
+      spawn("bundle exec whenever --update-crontab")
+      redirect_to root_path
+    elsif params[:button2]
+      spawn("bundle exec whenever --clear-crontab")
+      redirect_to root_path
+    end
     # ログインしている教師のコースのレコードを取得
     # @courses = current_user.courses.all
     # 上記のレコードでfocus: trueのレコードを取得
-    @focus_course = Course.find_by(focus: true)
-    # focus: trueであるコースに属している学生を取得
-    @users = @focus_course.users.where(role: "Student")
-    # 上記の学生で課題を提出している学生レコードを取得
-    @submitted_student = @users.joins(:events).where.not(events: {submitted_time: nil})
-    # 課題を提出していない学生レコードを取得
-    @not_submitted_student = @users.joins(:events).where(events: {submitted_time: nil})
-    # 学生が提出したアクティビティ名
+    # @focus_course = Course.find_by(focus: true)
+    # # focus: trueであるコースに属している学生を取得
+    # @users = @focus_course.users.where(role: "Student")
+    # # 上記の学生で課題を提出している学生レコードを取得
+    # @submitted_student = @users.joins(:events).where.not(events: {submitted_time: nil})
+    # # 課題を提出していない学生レコードを取得
+    # @not_submitted_student = @users.joins(:events).where(events: {submitted_time: nil})
+    # # 学生が提出したアクティビティ名
   
-    # 課題を提出していない学生の人数を代入
-    @all_not_submitted_student = @not_submitted_student.count
-    # 課題を提出している学生の人数を代入
-    @all_submitted_student = @submitted_student.count
-    # モニタリングする学生すべての人数
-    @all_student = @submitted_student.count + @not_submitted_student.count
-    # すべての学生人数を３で割った時の商を取得
-    # 例：４÷３＝1.333....の１を@divnum に代入
-    @divnum = @all_student.div(3) * 2
+    # # 課題を提出していない学生の人数を代入
+    # @all_not_submitted_student = @not_submitted_student.count
+    # # 課題を提出している学生の人数を代入
+    # @all_submitted_student = @submitted_student.count
+    # # モニタリングする学生すべての人数
+    # @all_student = @submitted_student.count + @not_submitted_student.count
+    # # すべての学生人数を３で割った時の商を取得
+    # # 例：４÷３＝1.333....の１を@divnum に代入
+    # @divnum = @all_student.div(3) * 2
     
-    # 2/3の学生が提出しているかどうかの処理
-    if @divnum <= @all_submitted_student
-      flash[:notice] = "メッセージが送信されました"
-      # redirect_to root_path
-    elsif @divnum > @all_submitted_student
-      flash[:notice] = "メッセージは送信されませんでした"
-    end
+    # # 2/3の学生が提出しているかどうかの処理
+    # if @divnum <= @all_submitted_student
+    #   flash[:notice] = "メッセージが送信されました"
+    #   # redirect_to root_path
+    # elsif @divnum > @all_submitted_student
+    #   flash[:notice] = "メッセージは送信されませんでした"
+    # end
   end
 
   def create

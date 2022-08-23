@@ -35,7 +35,7 @@ every 1.minute do
   rake "extract:student_extract"
 end
 
-every 5.minute do
+every 10.minute do
   rake "extract:reset_flag"
 end
 
