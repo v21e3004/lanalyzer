@@ -7,8 +7,6 @@ class CoursesController < ApplicationController
   def create
     @course = Course.new(course_params)
       if @course.save
-        endtime = @course.start_time + Rational(1, 24)
-        @course.update(end_time: endtime)
         user = current_user
         @course.users << user
         redirect_to root_path
@@ -38,6 +36,6 @@ class CoursesController < ApplicationController
   
   private
     def course_params
-        params.require(:course).permit(:course_code, :name, :start_time)
+        params.require(:course).permit(:course_code, :name, :start_time, :end_time)
     end
 end

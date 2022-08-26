@@ -36,7 +36,7 @@ every 1.minute do
 end
 
 every 10.minute do
-  rake "extract:reset_flag"
+  rake "extract:reset"
 end
 
 # bundle exec whenever --update-crontab

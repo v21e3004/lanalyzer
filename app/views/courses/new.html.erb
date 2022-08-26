@@ -3,14 +3,18 @@
     <div>
         <%= f.label :授業名 %><br>
         <%= f.text_field :name, autofocus: true %>
-    </div>
+    </div><br>
     <div>
         <%= f.label :時間割コード %><br>
         <%= f.text_field :course_code, autofocus: true %>
-    </div>
+    </div><br>
     <div>
-        <%= f.label :授業日時 %><br>
-        <%= f.text_field :start_time, autofocus: true %>
-    </div>
+        <%= f.label :授業開始日時 %><br>
+        <%= f.datetime_field :start_time %>
+    </div><br>
+    <div>
+        <%= f.label :授業終了日時 %><br>
+        <%= f.datetime_field :end_time %>
+    </div><br>
     <div><%= f.submit "送信" %></div>
 <% end %>

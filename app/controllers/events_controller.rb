@@ -4,13 +4,11 @@ class EventsController < ApplicationController
   require 'uri'
   require 'json'
   def index
-    if params[:button1]
-      spawn("bundle exec whenever --update-crontab")
-      redirect_to root_path
-    elsif params[:button2]
-      spawn("bundle exec whenever --clear-crontab")
-      redirect_to root_path
-    end
+    # if params[:button1]
+    spawn("bundle exec whenever --update-crontab")
+    # elsif params[:button2]
+    #   spawn("bundle exec whenever --clear-crontab")
+    # end
     # ログインしている教師のコースのレコードを取得
     # @courses = current_user.courses.all
     # 上記のレコードでfocus: trueのレコードを取得

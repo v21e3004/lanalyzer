@@ -20,36 +20,36 @@
 Flag.create(send: false)
 
 # 課題提出済み
-@user1 = User.new(email: "v00e0001@oita-u.ac.jp", name: "v00e0001 student1", password: "v00e0001", role: "Student", student_id: "v00e0001")
+@user1 = User.new(email: "v00e0001@oita-u.ac.jp", name: "v00e0001 student1", password: "v00e0001", role: "Student", student_id: "v00e0001", status: false)
 @user1.save
 Event.create(name: "テキスト課題", user_id: @user1.id, course_id: @course1.id, activity_access: "2022-07-18 00:00:00", submitted_time: "2022-07-18 01:00:00")
 @course1.users << @user1
 
-@user2 = User.new(email: "v00e0002@oita-u.ac.jp", name: "v00e0002 student2", password: "v00e0002", role: "Student", student_id: "v00e0002")
+@user2 = User.new(email: "v00e0002@oita-u.ac.jp", name: "v00e0002 student2", password: "v00e0002", role: "Student", student_id: "v00e0002", status: false)
 @user2.save
 Event.create(name: "テキスト課題", user_id: @user2.id, course_id: @course1.id, activity_access: "2022-07-18 00:00:00", submitted_time: "2022-07-18 01:00:00")
 @course1.users << @user2
 
-# @user3 = User.new(email: "v00e0003@oita-u.ac.jp", name: "v00e0003 student3", password: "v00e0003", role: "Student", student_id: "v00e0003")
-# @user3.save
-# Event.create(name: "テキスト課題1", user_id: @user3.id, course_id: @course2.id, activity_access: "2022-07-18 00:00:00", submitted_time: "2022-07-18 01:00:00")
-# @course2.users << @user3
+@user3 = User.new(email: "v00e0003@oita-u.ac.jp", name: "v00e0003 student3", password: "v00e0003", role: "Student", student_id: "v00e0003", status: false)
+@user3.save
+Event.create(name: "テキスト課題", user_id: @user3.id, course_id: @course1.id, activity_access: "2022-07-18 00:00:00", submitted_time: "2022-07-18 01:00:00")
+@course1.users << @user3
 
-# @user4 = User.new(email: "v00e0004@oita-u.ac.jp", name: "v00e0004 student4", password: "v00e0004", role: "Student", student_id: "v00e0004")
-# @user4.save
-# Event.create(name: "テキスト課題1", user_id: @user4.id, course_id: @course2.id, activity_access: "2022-07-18 00:00:00", submitted_time: "2022-07-18 01:00:00")
-# # , submitted_time: "2022-07-18 01:00:00"
-# @course2.users << @user4
+@user4 = User.new(email: "v00e0004@oita-u.ac.jp", name: "v00e0004 student4", password: "v00e0004", role: "Student", student_id: "v00e0004", status: true)
+@user4.save
+Event.create(name: "テキスト課題", user_id: @user4.id, course_id: @course1.id, activity_access: "2022-07-18 00:00:00", submitted_time: "2022-07-18 01:00:00")
+# , submitted_time: "2022-07-18 01:00:00"
+@course1.users << @user4
 
-# @user5 = User.new(email: "v00e0005@oita-u.ac.jp", name: "v00e0005 student5", password: "v00e0005", role: "Student", student_id: "v00e0005")
-# @user5.save
-# Event.create(name: "テキスト課題1", user_id: @user5.id, course_id: @course2.id, activity_access: "2022-07-18 00:00:00", submitted_time: "2022-07-18 01:00:00")
-# @course2.users << @user5
+@user5 = User.new(email: "v00e0005@oita-u.ac.jp", name: "v00e0005 student5", password: "v00e0005", role: "Student", student_id: "v00e0005", status: false)
+@user5.save
+Event.create(name: "テキスト課題", user_id: @user5.id, course_id: @course1.id, activity_access: "2022-07-18 00:00:00", submitted_time: "2022-07-18 01:00:00")
+@course1.users << @user5
 
-# @user6 = User.new(email: "v00e0006@oita-u.ac.jp", name: "v00e0006 student6", password: "v00e0006", role: "Student", student_id: "v00e0006")
-# @user6.save
-# Event.create(name: "テキスト課題1", user_id: @user6.id, course_id: @course2.id, activity_access: "2022-07-18 00:00:00", submitted_time: "2022-07-18 01:00:00")
-# @course2.users << @user6
+@user6 = User.new(email: "v00e0006@oita-u.ac.jp", name: "v00e0006 student6", password: "v00e0006", role: "Student", student_id: "v00e0006", status: true)
+@user6.save
+Event.create(name: "テキスト課題", user_id: @user6.id, course_id: @course1.id, activity_access: "2022-07-18 00:00:00", submitted_time: "2022-07-18 01:00:00")
+@course1.users << @user6
 
 # @user7 = User.new(email: "v00e0007@oita-u.ac.jp", name: "v00e0007 student7", password: "v00e0007", role: "Student", student_id: "v00e0007")
 # @user7.save
@@ -59,17 +59,17 @@ Event.create(name: "テキスト課題", user_id: @user2.id, course_id: @course1
 
 
 # 課題未提出
-@user11 = User.new(email: "v00e0011@oita-u.ac.jp", name: "v00e0011 student11", password: "v00e0011", role: "Student", student_id: "v00e0011")
+@user11 = User.new(email: "v00e0011@oita-u.ac.jp", name: "v00e0011 student11", password: "v00e0011", role: "Student", student_id: "v00e0011", status: true)
 @user11.save
 Event.create(user_id: @user11.id, course_id: @course1.id, activity_access: "2022-07-18 00:00:00")
 @course1.users << @user11
 
-@user12 = User.new(email: "v00e0012@oita-u.ac.jp", name: "v00e0012 student12", password: "v00e0012", role: "Student", student_id: "v00e0012")
+@user12 = User.new(email: "v00e0012@oita-u.ac.jp", name: "v00e0012 student12", password: "v00e0012", role: "Student", student_id: "v00e0012", status: false)
 @user12.save
 Event.create(user_id: @user12.id, course_id: @course1.id, activity_access: "2022-07-18 00:00:00")
 @course1.users << @user12
 
-@user13 = User.new(email: "v00e0013@oita-u.ac.jp", name: "v00e0013 student13", password: "v00e0013", role: "Student", student_id: "v00e0013")
+@user13 = User.new(email: "v00e0013@oita-u.ac.jp", name: "v00e0013 student13", password: "v00e0013", role: "Student", student_id: "v00e0013", status: false)
 @user13.save
 Event.create(user_id: @user13.id, course_id: @course1.id, activity_access: "2022-07-18 00:00:00")
 @course1.users << @user13
