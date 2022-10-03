@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class FlagTest < ActiveSupport::TestCase
+class TimetabaleTest < ActiveSupport::TestCase
   # test "the truth" do
   #   assert true
   # end

@@ -1,20 +1,25 @@
+<%= current_user.name %>
 <%= link_to "ログアウト", destroy_user_session_path, method: :delete %><br>
-<h1>TEST</h1>
-<h2>モニタリングする授業</h2>
-    <h3><%= @focus_course.name %></h3>
-    <p>モニタリングする課題：
-        <% @events.each do |event| %>
-            <%= event.name %>
+<h2>メッセージ送信システム</h2>
+    <% if !@find_course.nil? %>
+        <% @focus_course.each do |course| %>
+            <h3>モニタリングする授業：
+            <%= course.name %></h3>
+            <p>モニタリングする課題：
+            <% course.activities.each do |activity|%>
+               <%= activity.name %></p>
+               <p>提出した学生：
+               <% activity.events.each do |event|%>
+                   <%= event.user.name %>
+                   <%= event.submitted_time %></p>
+               <% end %>
+            <% end %>
         <% end %>
-    </p><br>
-    <p>学生：
-        <% @users.each do |user| %>
-            <ol>
-                <%= user.name %>
-            </ol>
-        <% end %>
-    </p><br>
-<h2>授業一覧</h2>
+    <% else %>
+        <p>モニタリングする授業はありません</p>
+    <% end %>
+    
+<h3>授業一覧</h3>
     <% @courses.each do |course| %>
         <li>
             <%= link_to course.name, "courses/#{course.id}/edit", method: :get %>

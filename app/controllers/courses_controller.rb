@@ -9,7 +9,13 @@ class CoursesController < ApplicationController
       if @course.save
         user = current_user
         @course.users << user
-        redirect_to root_path
+        @course.update(send_message: false)
+        # redirect_to new_timetable_path
+        
+        @courses = current_user.courses.all
+        @courses.update_all(focus: false)
+        @course.update(focus: true)
+        redirect_to new_timetable_path(@course.id)
       else
         flash[:notice] = "入力エラーです"
         render :new
@@ -23,8 +29,9 @@ class CoursesController < ApplicationController
   end
   
   def edit
+    @courses = current_user.courses.all
     # current_user.courses.update_all(focus: false)
-    Course.update_all(focus: false)
+    @courses.update_all(focus: false, send_message: false)
     @course = Course.find(params[:id])
     @course.update(focus: true)
     redirect_to root_path
@@ -36,6 +43,6 @@ class CoursesController < ApplicationController
   
   private
     def course_params
-        params.require(:course).permit(:course_code, :name, :start_time, :end_time)
+        params.require(:course).permit(:course_code, :name)
     end
 end

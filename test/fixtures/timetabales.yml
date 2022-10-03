@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  start_time: 2022-09-18 08:33:55
+  end_time: 2022-09-18 08:33:55
+  course: 
+
+two:
+  start_time: 2022-09-18 08:33:55
+  end_time: 2022-09-18 08:33:55
+  course: 

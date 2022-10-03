@@ -1,4 +1,4 @@
-<h1>Courses#new</h1>
+<h1>モニタリングする授業の登録</h1>
 <%= form_for @course do |f| %>
     <div>
         <%= f.label :授業名 %><br>
@@ -7,14 +7,6 @@
     <div>
         <%= f.label :時間割コード %><br>
         <%= f.text_field :course_code, autofocus: true %>
-    </div><br>
-    <div>
-        <%= f.label :授業開始日時 %><br>
-        <%= f.datetime_field :start_time %>
-    </div><br>
-    <div>
-        <%= f.label :授業終了日時 %><br>
-        <%= f.datetime_field :end_time %>
     </div><br>
     <div><%= f.submit "送信" %></div>
 <% end %>

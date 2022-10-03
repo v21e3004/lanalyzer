@@ -10,16 +10,29 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20220823074008) do
+ActiveRecord::Schema.define(version: 20221001060417) do
+
+  create_table "activities", force: :cascade do |t|
+    t.string   "name"
+    t.string   "activity_id"
+    t.integer  "course_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+    t.integer  "event"
+    t.integer  "event_id"
+    t.index ["course_id"], name: "index_activities_on_course_id"
+    t.index ["event_id"], name: "index_activities_on_event_id"
+  end
 
   create_table "courses", force: :cascade do |t|
     t.string   "name"
     t.string   "course_code"
     t.datetime "start_time"
     t.datetime "end_time"
-    t.datetime "created_at",                  null: false
-    t.datetime "updated_at",                  null: false
-    t.boolean  "focus",       default: false, null: false
+    t.datetime "created_at",                   null: false
+    t.datetime "updated_at",                   null: false
+    t.boolean  "focus",        default: false, null: false
+    t.boolean  "send_message"
   end
 
   create_table "enrollments", force: :cascade do |t|
@@ -40,15 +53,32 @@ ActiveRecord::Schema.define(version: 20220823074008) do
     t.integer  "course_id"
     t.datetime "created_at",      null: false
     t.datetime "updated_at",      null: false
-    t.string   "activity_id"
+    t.integer  "activity_id"
+    t.index ["activity_id"], name: "index_events_on_activity_id"
     t.index ["course_id"], name: "index_events_on_course_id"
     t.index ["user_id"], name: "index_events_on_user_id"
   end
 
-  create_table "flags", force: :cascade do |t|
-    t.boolean  "send"
+  create_table "timetables", force: :cascade do |t|
+    t.integer  "course_id",  null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "lesson1"
+    t.datetime "lesson2"
+    t.datetime "lesson3"
+    t.datetime "lesson4"
+    t.datetime "lesson5"
+    t.datetime "lesson6"
+    t.datetime "lesson7"
+    t.datetime "lesson8"
+    t.datetime "lesson9"
+    t.datetime "lesson10"
+    t.datetime "lesson11"
+    t.datetime "lesson12"
+    t.datetime "lesson13"
+    t.datetime "lesson14"
+    t.datetime "lesson15"
+    t.index ["course_id"], name: "index_timetables_on_course_id"
   end
 
   create_table "users", force: :cascade do |t|
