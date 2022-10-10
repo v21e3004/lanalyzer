@@ -6,8 +6,9 @@
         <% course.activities.each do |activity|%>
            <p>モニタリングする課題：<%= activity.name %></p>
            <p>提出した学生：<% activity.events.each do |event|%>
-                <ol><%= event.user.name %>
-                   <%= event.submitted_time %>
+                <ol>
+                    <%= event.user.name %>
+                    <%= event.submitted_time %>
                 </ol>
             </p>
            <% end %>

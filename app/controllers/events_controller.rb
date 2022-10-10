@@ -10,29 +10,29 @@ class EventsController < ApplicationController
   def send_message(send_activity_name, send_course_code)
     # ログイン中の教師が持つ授業のうち，focus: trueのものをモニタリング
     # コース，アクティビティ，イベントの３つのテーブルを結合
-    @courses_activities_events = Course.eager_load(activities: :events).where(courses: {focus: true})
-    @courses_activities_events.each do |course|
+    courses_activities_events = Course.eager_load(activities: :events).where(courses: {focus: true})
+    courses_activities_events.each do |course|
       if course.course_code == send_course_code
         course.activities.each do |activity|
           # message1 = "他の学生は#{activity.name}を提出済みです。取り組みましょう。"
           # message2 = "他の学生は#{activity.name}を提出済みです。前回の授業で課題を提出できなかったので今回は提出しましょう。"
           # 提出済み学生のイベント：提出がnilでない学生のレコード
-          @submitted_user = User.joins(:events).where.not(events: {submitted_time: nil}).where(events: {activity_id: activity.id}).where(events: {course_id: course.id})
-          @submitted_students = @submitted_user.joins(:enrollments).where(enrollments: {role: "Student"})
-          @submitted_students_num = @submitted_students.count
+          submitted_user = User.joins(:events).where.not(events: {submitted_time: nil}).where(events: {activity_id: activity.id}).where(events: {course_id: course.id})
+          submitted_students = submitted_user.joins(:enrollments).where(enrollments: {role: "Student"})
+          submitted_students_num = submitted_students.count
           # 未提出学生のイベント：提出がnilな学生のレコード
-          @not_submitted_user = course.users.all
-          @not_submitted_students = @not_submitted_user.joins(:enrollments).where(enrollments: {role: "Student"})
-          @send_message_students = @not_submitted_students - @submitted_students
-          @not_submitted_students_all_num = @not_submitted_students.count
-          @not_submitted_students_num = @not_submitted_students_all_num - @submitted_students_num
-          @all_students_num = @submitted_students_num + @not_submitted_students_num
-          # すべての学生人数を３で割った時の商を取得
-          # 例：４÷３＝1.333....の１を@divnum に代入
-          @doubled = @all_students_num * 2
-          @divnum = @doubled.div(3)
-          if @divnum <= @submitted_students_num && send_activity_name == activity.name
-            @send_message_students.each do |student|
+          not_submitted_user = course.users.all
+          not_submitted_students = not_submitted_user.joins(:enrollments).where(enrollments: {role: "Student"})
+          send_message_students = not_submitted_students - submitted_students
+          not_submitted_students_all_num = not_submitted_students.count
+          not_submitted_students_num = not_submitted_students_all_num - submitted_students_num
+          all_students_num = submitted_students_num + not_submitted_students_num
+          # 2/3の学生数を取得：すべての学生人数を３で割った時の商を取得
+          # 例：４÷３＝1.333....の１をdivnum に代入
+          doubled = all_students_num * 2
+          divnum = doubled.div(3)
+          if divnum <= submitted_students_num && send_activity_name == activity.name
+            send_message_students.each do |student|
               # 過去に未提出の課題があるかどうかチェック
               submitted_activities = student.events.distinct.pluck(:activity_id)
               all_activities = Activity.distinct.pluck(:id)
@@ -64,7 +64,7 @@ class EventsController < ApplicationController
               response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
                 http.request(request)
               end
-              puts "メッセージ送信 =>#{student.name}"
+              puts "メッセージ送信 => #{student.name}"
             end
             puts "提出"
           else
@@ -100,10 +100,10 @@ class EventsController < ApplicationController
       user = User.create(email: stemail, name: stname, password: stid, student_id: stid)
       find_course.users << user
       # イベントを登録
-      @new_student = User.find_by(student_id: stid)
-      @new_student.enrollments.update(role: "Student")
-      @save_event = Event.new(user_id: @new_student.id, course_id: find_course.id)
-      @save_event.save!
+      new_student = User.find_by(student_id: stid)
+      new_student.enrollments.update(role: "Student")
+      save_event = Event.new(user_id: new_student.id, course_id: find_course.id)
+      save_event.save!
       puts "Student Created"
     end
     if strole == "http://purl.imsglobal.org/vocab/lis/v2/membership#Learner" && caliper_event["data"][0]["action"] == "http://purl.imsglobal.org/vocab/caliper/v1/action#Submitted" && !find_course.nil?

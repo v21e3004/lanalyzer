@@ -39,12 +39,12 @@
 @course1.users << @user2
 @user2.enrollments.update(role: "Student")
 
-@user3 = User.new(email: "v00e0003@oita-u.ac.jp", name: "v00e0003 student3", password: "v00e0003", student_id: "v00e0003")
-@user3.save
-@event3 = Event.create(user_id: @user3.id, activity_access: "2022-07-18 00:00:00", activity_id: @activity1.id, submitted_time: "2022-07-18 01:00:00", course_id: @course1.id)
-@event33 = Event.create(user_id: @user3.id, activity_access: "2022-07-18 00:00:00", activity_id: @activity2.id, submitted_time: "2022-07-18 00:32:32", course_id: @course1.id)
-@course1.users << @user3
-@user3.enrollments.update(role: "Student")
+# @user3 = User.new(email: "v00e0003@oita-u.ac.jp", name: "v00e0003 student3", password: "v00e0003", student_id: "v00e0003")
+# @user3.save
+# @event3 = Event.create(user_id: @user3.id, activity_access: "2022-07-18 00:00:00", activity_id: @activity1.id, submitted_time: "2022-07-18 01:00:00", course_id: @course1.id)
+# @event33 = Event.create(user_id: @user3.id, activity_access: "2022-07-18 00:00:00", activity_id: @activity2.id, submitted_time: "2022-07-18 00:32:32", course_id: @course1.id)
+# @course1.users << @user3
+# @user3.enrollments.update(role: "Student")
 
 @user4 = User.new(email: "v00e0004@oita-u.ac.jp", name: "v00e0004 student4", password: "v00e0004", student_id: "v00e0004")
 @user4.save
