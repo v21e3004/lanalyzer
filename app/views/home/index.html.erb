@@ -1,30 +1,50 @@
 <%= current_user.name %>
 <%= link_to "ログアウト", destroy_user_session_path, method: :delete %><br>
-<h2>メッセージ送信システム</h2>
-    <% @courses_activities_events.each do |course| %>
-        <h3>モニタリングする授業：<%= course.name %></h3>
-        <% course.activities.each do |activity|%>
-           <p>モニタリングする課題：<%= activity.name %></p>
-           <p>提出した学生：<% activity.events.each do |event|%>
-                <ol>
-                    <%= event.user.name %>
-                    <%= event.submitted_time %>
-                </ol>
-            </p>
-           <% end %>
+<h2>メッセージ送信システム LAnalyzer</h2>
+
+<% @login_user.each do |user| %>
+    <% if user.role == "Teacher" %>
+        <% @courses_activities_events.each do |course| %>
+            <h3>モニタリングする授業：<%= course.name %></h3>
+            <% course.activities.each do |activity|%>
+               <p>モニタリングする課題：<%= link_to activity.name, "activities/#{activity.id}/edit", method: :get %>
+                    <% if activity.sent_messages == false %>
+                        => 送信対象
+                    <% else %>
+                        => 送信済み
+                    <% end %>
+               </p>
+               <p>未提出学生：<% activity.events.each do |event|%>
+                    <ol>
+                        <%= event.user.name %>
+                        <%= event.submitted_time %>
+                    </ol>
+                </p>
+               <% end %>
+            <% end %>
         <% end %>
+            
+        <h3>授業一覧</h3>
+            <% @teacher_course.each do |course| %>
+                <li>
+                    <%= link_to course.name, "courses/#{course.id}/edit", method: :get %>
+                    <%= link_to "削除", "courses/#{course.id}", method: :delete %><br>
+                </li>
+            <% end %><br>
+        <%= button_to "授業を追加する", new_course_path, method: :get %><br>
+        <!--<%= button_to "モニタリング", events_path, method: :get %>-->
+        
+    <% elsif user.role == "Student"%>
+        <h3>履修授業一覧</h3>
+         <% @student_course.each do |course| %>
+            <li>
+                <%= link_to course.name, "courses/#{course.id}/edit", method: :get %>
+                <h4>着手済みアクティビティ</h4>
+                <% @submitted_student.each do |event| %>
+                        <%= event.activity.name %>、
+                <% end %><br>
+            </li>
+        <% end %><br>
     <% end %>
-    
-<h3>授業一覧</h3>
-    <% @courses.each do |course| %>
-        <li>
-            <%= link_to course.name, "courses/#{course.id}/edit", method: :get %>
-            <%= link_to "削除", "courses/#{course.id}", method: :delete %><br>
-        </li>
-    <% end %><br>
-
-<%= button_to "授業を追加する", new_course_path, method: :get %><br>
-<!--<%= button_to "モニタリング", events_path, method: :get %>-->
-
-
+<% end %>
 

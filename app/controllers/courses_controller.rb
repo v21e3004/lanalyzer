@@ -9,9 +9,7 @@ class CoursesController < ApplicationController
       if @course.save
         user = current_user
         @course.users << user
-        @course.update(send_message: false)
         @course.update(focus: true)
-        # redirect_to new_timetable_path(@course.id)
       else
         flash[:notice] = "入力エラーです"
         render :new
@@ -25,13 +23,18 @@ class CoursesController < ApplicationController
   end
   
   def edit
-    @course = Course.find(params[:id])
-    if @course.focus == true
-      @course.update(focus: false)
-    elsif @course.focus == false
-      @course.update(focus: true)
+    @role = Enrollment.find_by(user_id: current_user.id, course_id: params[:id])
+    if @role.role == "Teacher"
+      @course = Course.find(params[:id])
+      if @course.focus == true
+        @course.update(focus: false)
+      elsif @course.focus == false
+        @course.update(focus: true)
+      end
+      redirect_to root_path
+    elsif @role.role == "Student"
+      redirect_to root_path
     end
-    redirect_to root_path
   end
   
   # def update

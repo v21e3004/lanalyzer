@@ -12,10 +12,13 @@
 @course2 = Course.new(name: "テストコース２", course_code: "AA0002", focus: false)
 @course2.save
 
+@course3 = Course.new(name: "テストコース3", course_code: "AA0003", focus: true)
+@course3.save
+
 # アクティビティ追加
-@activity1 = Activity.create(name: "課題１", activity_id: 11, course_id: @course1.id)
-@activity2 = Activity.create(name: "演習課題", activity_id: 17, course_id: @course1.id)
-@activity3 = Activity.create(name: "テスト", activity_id: 1, course_id: @course2.id)
+@activity1 = Activity.create(name: "pdf", course_id: @course1.id, sent_messages: false)
+@activity2 = Activity.create(name: "演習課題", activity_id: 17, course_id: @course1.id, sent_messages: false)
+@activity3 = Activity.create(name: "課題１", activity_id: 11, course_id: @course2.id, sent_messages: false)
 # 
 # ユーザ登録
 @default_user = User.new(email: "test@test.com", name: "テストユーザ", password: "test@test.com")
@@ -24,18 +27,20 @@
 @course2.users << @default_user
 @default_user.enrollments.update(role: "Teacher")
 
+Enrollment.create(course_id: @activity3.id, user_id: @default_user.id, role: "Student")
+
 # 課題提出済み
 @user1 = User.new(email: "v00e0001@oita-u.ac.jp", name: "v00e0001 student1", password: "v00e0001", student_id: "v00e0001")
 @user1.save
-@event1 = Event.create(user_id: @user1.id, activity_id: @activity1.id, submitted_time: "2022-07-11 00:32:32", course_id: @course1.id)
-@event11 = Event.create(user_id: @user1.id, activity_id: @activity2.id, submitted_time: "2022-07-11 00:32:32", course_id: @course1.id)
+@event1 = Event.create(user_id: @user1.id, activity_id: @activity1.id, submitted_time: "2022-07-11 00:32:32", course_id: @course1.id, action: "Viewed")
+@event11 = Event.create(user_id: @user1.id, activity_id: @activity2.id, submitted_time: "2022-07-11 00:32:32", course_id: @course1.id, action: "Submitted")
 @course1.users << @user1
 @user1.enrollments.update(role: "Student")
 
 @user2 = User.new(email: "v00e0002@oita-u.ac.jp", name: "v00e0002 student2", password: "v00e0002", student_id: "v00e0002")
 @user2.save
-@event2 = Event.create(user_id: @user2.id, activity_id: @activity1.id, submitted_time: "2022-07-12 00:59:23", course_id: @course1.id)
-@event22 = Event.create(user_id: @user2.id, activity_id: @activity2.id, submitted_time: "2022-07-12 00:32:32", course_id: @course1.id)
+@event2 = Event.create(user_id: @user2.id, activity_id: @activity1.id, submitted_time: "2022-07-12 00:59:23", course_id: @course1.id, action: "Viewed")
+@event22 = Event.create(user_id: @user2.id, activity_id: @activity2.id, submitted_time: "2022-07-12 00:32:32", course_id: @course1.id, action: "Submitted")
 @course1.users << @user2
 @user2.enrollments.update(role: "Student")
 
@@ -48,8 +53,8 @@
 
 @user4 = User.new(email: "v00e0004@oita-u.ac.jp", name: "v00e0004 student4", password: "v00e0004", student_id: "v00e0004")
 @user4.save
-@event4 = Event.create(user_id: @user4.id, activity_id: @activity1.id, submitted_time: "2022-07-14 01:00:00", course_id: @course1.id)
-@event44 = Event.create(user_id: @user4.id, activity_id: @activity2.id, submitted_time: "2022-07-14 00:32:32", course_id: @course1.id)
+@event4 = Event.create(user_id: @user4.id, activity_id: @activity1.id, submitted_time: "2022-07-14 01:00:00", course_id: @course1.id, action: "Viewed")
+@event44 = Event.create(user_id: @user4.id, activity_id: @activity2.id, submitted_time: "2022-07-14 00:32:32", course_id: @course1.id, action: "Submitted")
 @course1.users << @user4
 @user4.enrollments.update(role: "Student")
 
@@ -81,8 +86,8 @@
 # 課題未提出
 @user11 = User.new(email: "v00e0011@oita-u.ac.jp", name: "v00e0011 student11", password: "v00e0011", student_id: "v00e0011")
 @user11.save
-@event11 = Event.create(user_id: @user11.id, course_id: @course1.id, activity_access: "2022-07-18 00:00:00",)
-Event.create(user_id: @user11.id, activity_id: @activity3.id, submitted_time: "2022-07-18 01:00:00", course_id: @course1.id)
+@event11 = Event.create(user_id: @user11.id, course_id: @course1.id)
+Event.create(user_id: @user11.id, activity_id: @activity3.id, submitted_time: "2022-07-18 01:00:00", course_id: @course1.id, action: "Access")
 @course1.users << @user11
 @user11.enrollments.update(role: "Student")
 
