@@ -9,7 +9,7 @@
 @course1 = Course.new(name: "テストコース１", course_code: "AA0001", focus: true)
 @course1.save
 
-@course2 = Course.new(name: "テストコース２", course_code: "AA0002", focus: false)
+@course2 = Course.new(name: "テストコース２", course_code: "AA0002", focus: true)
 @course2.save
 
 @course3 = Course.new(name: "テストコース3", course_code: "AA0003", focus: true)
@@ -21,12 +21,13 @@
 @activity3 = Activity.create(name: "課題１", activity_id: 11, course_id: @course2.id, sent_messages: false)
 # 
 # ユーザ登録
-@default_user = User.new(email: "test@test.com", name: "テストユーザ", password: "test@test.com")
+@default_user = User.new(email: "test@test.com", name: "テストユーザ", password: "test@test.com", student_id: "v00e0011")
 @default_user.save
 @course1.users << @default_user
 @course2.users << @default_user
 @default_user.enrollments.update(role: "Teacher")
-
+# 以下をコメントアウト解除でデフォルトユーザにテストコース３を紐付け
+# 解除するとデフォルトユーザがテストコース３に学生として登録
 Enrollment.create(course_id: @activity3.id, user_id: @default_user.id, role: "Student")
 
 # 課題提出済み
@@ -86,7 +87,8 @@ Enrollment.create(course_id: @activity3.id, user_id: @default_user.id, role: "St
 # 課題未提出
 @user11 = User.new(email: "v00e0011@oita-u.ac.jp", name: "v00e0011 student11", password: "v00e0011", student_id: "v00e0011")
 @user11.save
-@event11 = Event.create(user_id: @user11.id, course_id: @course1.id)
+# @event5 = Event.create(user_id: @user11.id, activity_id: @activity1.id, submitted_time: "2022-07-11 00:32:32", course_id: @course1.id, action: "Viewed")
+# @event11 = Event.create(user_id: @user11.id, course_id: @course1.id)
 Event.create(user_id: @user11.id, activity_id: @activity3.id, submitted_time: "2022-07-18 01:00:00", course_id: @course1.id, action: "Access")
 @course1.users << @user11
 @user11.enrollments.update(role: "Student")

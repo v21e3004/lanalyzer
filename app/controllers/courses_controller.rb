@@ -23,8 +23,8 @@ class CoursesController < ApplicationController
   end
   
   def edit
-    @role = Enrollment.find_by(user_id: current_user.id, course_id: params[:id])
-    if @role.role == "Teacher"
+    @student_course = Enrollment.find_by(user_id: current_user.id, course_id: params[:id])
+    if @student_course.role == "Teacher"
       @course = Course.find(params[:id])
       if @course.focus == true
         @course.update(focus: false)
@@ -32,7 +32,12 @@ class CoursesController < ApplicationController
         @course.update(focus: true)
       end
       redirect_to root_path
-    elsif @role.role == "Student"
+    elsif @student_course.role == "Student"
+      if @student_course.monitoring == true
+        @student_course.update(monitoring: false)
+      elsif @student_course.monitoring == false
+        @student_course.update(monitoring: true)
+      end
       redirect_to root_path
     end
   end

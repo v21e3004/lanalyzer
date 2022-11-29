@@ -1,9 +1,9 @@
-<%= current_user.name %>
 <%= link_to "ログアウト", destroy_user_session_path, method: :delete %><br>
 <h2>メッセージ送信システム LAnalyzer</h2>
 
 <% @login_user.each do |user| %>
     <% if user.role == "Teacher" %>
+    <p>教師: <%= current_user.name %></p>
         <% @courses_activities_events.each do |course| %>
             <h3>モニタリングする授業：<%= course.name %></h3>
             <% course.activities.each do |activity|%>
@@ -32,17 +32,16 @@
                 </li>
             <% end %><br>
         <%= button_to "授業を追加する", new_course_path, method: :get %><br>
-        <!--<%= button_to "モニタリング", events_path, method: :get %>-->
+        <%= button_to "モニタリング", logistic_regression_path, method: :get %>
         
     <% elsif user.role == "Student"%>
+    <p>学生: <%= current_user.name %></p>
         <h3>履修授業一覧</h3>
          <% @student_course.each do |course| %>
             <li>
                 <%= link_to course.name, "courses/#{course.id}/edit", method: :get %>
                 <h4>着手済みアクティビティ</h4>
-                <% @submitted_student.each do |event| %>
-                        <%= event.activity.name %>、
-                <% end %><br>
+                
             </li>
         <% end %><br>
     <% end %>

@@ -1,9 +1,9 @@
 Rails.application.routes.draw do
-  get 'activities/new'
   root "home#index"
   get "home" => "home#edit"
   post "events" => "events#create"
   get "events" => "events#index"
+  get "logistic_regression" => "logistic_regression#index"
   devise_for :users
   resources :courses
   resources :activities
