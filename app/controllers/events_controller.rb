@@ -285,13 +285,21 @@ class EventsController < ApplicationController
           if event.nil?
             Event.create(user_id: find_student.id, submitted_time: access_time, activity_id: activity.id, course_id: find_course.id, action: "Submitted")
             puts "提出イベント作成"
+            # --------------------------------新しい期限付き課題作成と同時にロジスティック回帰モデルでωを計算---------------------------------------------------------------------------------------
+            submitted_activities = find_course.activities.where.not(date_to_submit: nil).where.not(date_to_start: nil)
+            submitted_activities_num = submitted_activities.count
+            if submitted_activities_num > 1
+              redirect_to "logistic_regression/#{find_course.id}", method: :get
+            end
           else
             event.update(submitted_time: access_time, action: "Submitted")
             puts "提出イベントアップデート"
           end
         end
-        # アルゴリズムの呼び出し
-        submitted_extract_students(activity_name, access_course)
+        # 閾値2/3アルゴリズムの呼び出し
+        # submitted_extract_students(activity_name, access_course)
+        # ロジスティック回帰モデルアルゴリズムの呼び出し
+        submitted_extract_students(activity.id, access_course)
         puts "Update submitted time"
         # action#Viewedの場合
       elsif strole == "http://purl.imsglobal.org/vocab/lis/v2/membership#Learner" && caliper_event["data"][0]["action"] == "http://purl.imsglobal.org/vocab/caliper/v1/action#Viewed" && !find_course.nil?

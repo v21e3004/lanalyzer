@@ -1,5 +1,9 @@
 class LogisticRegressionController < ApplicationController
   require 'matrix'
+  require 'net/http'
+  require 'uri'
+  require 'json'
+  require 'openssl'
 
   ALPHA = 0.01      # 学習率
   EPS   = 1.0e-12   # 閾値
@@ -56,59 +60,190 @@ class LogisticRegressionController < ApplicationController
     raise
   end
   
-  def index
-    # 説明(独立)変数と目的(従属)変数
-    # （ e.g.  n 行 3 列 (x1, x2..., y) )
-    # data = Matrix[
-    #   [30, 21, 0],
-    #   [22, 10, 0],
-    #   [26, 25, 0],
-    #   [14, 20, 0],
-    #   [ 6, 10, 1],
-    #   [ 2, 15, 1],
-    #   [ 6,  5, 1],
-    #   [10,  5, 1],
-    #   [19, 15, 1]
-    # ]
-
-    data = Matrix[
-      [0, 0, 0, 0],
-      [0, 20, 12, 0],
-      [0, 40, 12, 0],
-      [13, 30, 100, 0],
-      [10, 30, 15, 0],
-      [28, 20, 15, 0],
-      [27, 30, 16, 0],
-      [29, 30, 16, 0],
-      [32, 50, 18, 0],
-      [41, 20, 22, 0],
-      [30, 100, 97, 0],
-      [31, 100, 26, 0],
-      [55, 40, 27, 0],
-      [41, 100, 29, 0],
-      [69, 70, 41, 0],
-      [33, 100, 22, 1],
-      [69, 100, 41, 1],
-      [76, 90, 52, 1],
-      [74, 100, 25, 1],
-      [78, 80, 66, 1],
-      [77, 100, 67, 1],
-      [79, 100, 70, 1],
-      [83, 100, 71, 1],
-      [86, 100, 75, 1],
-      [88, 100, 82, 1],
-      [90, 100, 74, 1]
-    ]
-    puts "data ="
-    data.to_a.each { |row| p row }
+  # x学習ログの正規化
+  def normalization_x(receive_course)
+    users_array = []
+    course = Course.find_by(id: receive_course.id)
+    users = course.users.all
+    students = users.joins(:enrollments).where(enrollments: {role: "Student"})
+    students_num = students.count
+    activities = course.activities.where.not(date_to_submit: nil).where.not(date_to_start: nil)
+    activities_num = activities.count
+    # 二次元配列初期化・アクティビティ毎の提出パーセントを配列に代入，代入後たしあわせて平均値を求める
+    activities_per_array = Array.new(activities_num) { Array.new(students_num,0) }
+    activities.each_with_index do |activity, i|
+      start_time = activity.date_to_start
+      end_time = activity.date_to_submit
+      # 分母
+      denominator = ((end_time - start_time) * 60 * 24).to_i
+      students.each_with_index do |student, j|
+        student_event = student.events.find_by(activity_id: activity.id)
+        if !student_event.nil?
+          student_submit_time = student_event.submitted_time
+          # 分子
+          if !student_submit_time.nil? && end_time > student_submit_time
+            numerator = ((end_time - student_submit_time) * 60 * 24).to_i
+          else
+            numerator = 0
+          end
+        else
+          numerator = 0
+        end
+        float = ((numerator.to_f / denominator.to_f) * 100.0).to_f
+        activities_per_array[i][j] = float
+      end
+    end
+    add = activities_per_array.transpose.map{|array| array.sum}
+    add.each do |value|
+      result = value / activities_num
+      users_array.push(result.to_i)
+    end
+    return users_array
+  end
+  
+  # y学習ログの正規化
+  def normalization_y(receive_course)
+    users_array = []
+    course = Course.find_by(id: receive_course.id)
+    users = course.users.all
+    students = users.joins(:enrollments).where(enrollments: {role: "Student"})
+    all_activities = course.activities.all
+    # 分母
+    denominator = all_activities.count
+    students.each do |student|
+      student_activities = student.events.where(action: "Viewed").or(student.events.where(action: "Submitted"))
+      numerator = student_activities.count
+      result = ((numerator.to_f / denominator.to_f) * 100.0).to_f
+      users_array.push(result.to_i)
+    end
+    return users_array
+  end
+  
+  # p(probability)学習ログの正規化
+  def normalization_p(receive_course)
+    users_array = []
+    course = Course.find_by(id: receive_course.id)
+    users = course.users.all
+    students = users.joins(:enrollments).where(enrollments: {role: "Student"})
+    all_activities = course.activities.where.not(date_to_submit: nil).where.not(date_to_start: nil)
+    latest_activities = all_activities[-2]
+    # latest_activities = course.activities.find_by(activity_id: 729813)
+    students.each do |student|
+      student_activities = student.events.find_by(activity_id: latest_activities.id)
+      if student_activities.nil?
+        users_array.push(0)
+      else
+        users_array.push(1)
+      end
+    end
+    return users_array
+  end
+  
+  def create_matrix(receive_course)
+    @data = Matrix[]
+    # x_array = normalization_x(receive_course)
+    y_array = normalization_y(receive_course)
+    p_array = normalization_p(receive_course)
+    # p x_array
+    # p y_array
+    # p p_array
+    @data = Matrix.rows([y_array, p_array]).transpose
+    return @data
+  end
+  
+  def request_to_potify(student_id, sendername, message)
+    uri = URI.parse("http://3.89.178.10:8080/users/#{student_id}/messages")
+    request = Net::HTTP::Post.new(uri)
+    request.content_type = "application/json;charaset=utf-8"
+    request.body = JSON.dump({
+      "message" => {
+        "title" => "#{sendername}の通知",
+        "body" => "【#{sendername}の通知】\n#{message}\n\nMessage Created by LAnalyzer",
+        "icon" => "/icon.png"
+      }
+    })
     
+    req_options = {
+      use_ssl: uri.scheme == "https",
+    }
+    response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
+      http.request(request)
+    end
+    puts "メッセージ送信 => #{student_id}"
+  end
+  
+  #Submitアクティビティが新しく登録された際に実行
+  def calc
+    # 説明(独立)変数と目的(従属)変数
+    # （ e.g.  n 行 3 列 (x, y..., p) )
+    # 引数c:計算を行うコース，引数a:新しく追加された期限あり課題
+    course = Course.find(params[:id])
+    users = course.users.all
+    students = users.joins(:enrollments).where(enrollments: {role: "Student"})
+    message = "#{course.name}に期限ありの課題が追加されました。提出時刻を確認し、取り組みましょう。"
+    # x_array = normalization_x(course)
+    y_array = normalization_y(course)
+    create_matrix(course)
+    puts "data ="
+    @data.to_a.each { |row| p row }
     # ロジスティック回帰式の定数・係数計算(o0, o1, o2, ...)
     puts "\nNow computing...\n\n"
-    reg_logistic = reg_logistic(data)
-    # reg_logistic = data.reg_logistic
+    reg_logistic = reg_logistic(@data)
+    omegas = reg_logistic.to_a
+    omegas = omegas.flatten
     puts "omegas = "
-    p reg_logistic.to_a
-    @view = reg_logistic.to_a
+    p omegas
+    students.each_with_index do |student, i|
+      # percent = 1.0 / (1.0 + Math.exp(-1 * (omegas[0] + (omegas[1] * x_array[i]) + (omegas[2] * y_array[i]))))
+      percent = 1.0 / (1.0 + Math.exp(-1 * (omegas[0] + (omegas[1] * y_array[i]))))
+      if percent >= 0.5 && percent < 1
+        puts "メッセージ送信"
+        p student.name
+        p percent.to_i
+        request_to_potify(student.student_id, course.name, message)
+      elsif percent < 0.5 && percent > 0 && percent >= 1
+        puts "未送信"
+        p student.name
+        p percent.to_i
+      else
+        p student.name
+        p percent.to_i
+      end
+    end
+  end
+  
+  def index
+    # 説明(独立)変数と目的(従属)変数
+    # （ e.g.  n 行 3 列 (x, y..., p) )
+    course = Course.find_by(course_code: "AA0001")
+    users = course.users.all
+    students = users.joins(:enrollments).where(enrollments: {role: "Student"})
+    x_array = normalization_x(course)
+    y_array = normalization_y(course)
+    create_matrix(course)
+    puts "data ="
+    @data.to_a.each { |row| p row }
+    # ロジスティック回帰式の定数・係数計算(o0, o1, o2, ...)
+    puts "\nNow computing...\n\n"
+    # reg_logistic = reg_logistic(@data)
+    # reg_logistic = data.reg_logistic
+    omegas = [[-9.90274296996335, 5.0, 5.0]]
+    omegas = omegas.flatten
+    puts "omegas = "
+    p omegas
+    students.each_with_index do |student, i|
+      aaa = -1 * (omegas[0] + (omegas[1] * x_array[i]) + (omegas[2] * y_array[i]))
+      percent = 1.0 / (1.0 + Math.exp(aaa))
+      if percent > 0.5
+        puts "メッセージ送信"
+        p student.name
+        p percent
+      else
+        puts "未送信"
+        p student.name
+        p percent
+      end
+    end
   end
   private :sigmoid, :cross_entropy_loss
 end

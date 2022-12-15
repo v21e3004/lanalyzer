@@ -29,10 +29,11 @@
                 <li>
                     <%= link_to course.name, "courses/#{course.id}/edit", method: :get %>
                     <%= link_to "削除", "courses/#{course.id}", method: :delete %><br>
+                    <%= button_to "テスト用", "logistic_regression/#{course.id}", method: :get %>
                 </li>
             <% end %><br>
         <%= button_to "授業を追加する", new_course_path, method: :get %><br>
-        <%= button_to "モニタリング", logistic_regression_path, method: :get %>
+        
         
     <% elsif user.role == "Student"%>
     <p>学生: <%= current_user.name %></p>

@@ -10,15 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20221112013221) do
+ActiveRecord::Schema.define(version: 20221206005447) do
 
   create_table "activities", force: :cascade do |t|
     t.string   "name"
     t.integer  "activity_id"
     t.integer  "course_id"
-    t.datetime "created_at",    null: false
-    t.datetime "updated_at",    null: false
+    t.datetime "created_at",     null: false
+    t.datetime "updated_at",     null: false
     t.boolean  "sent_messages"
+    t.datetime "date_to_start"
+    t.datetime "date_to_submit"
     t.index ["course_id"], name: "index_activities_on_course_id"
   end
 
