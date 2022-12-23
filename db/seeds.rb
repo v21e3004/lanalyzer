@@ -15,20 +15,20 @@ end
 
 # 学生登録（2014B-CCCのみ）
 student_index = 0
-CSV.foreach('db/csv/studentInfo_2014B_CCC.csv', headers: true) do |row|
+CSV.foreach('db/csv/2014B_CCC/studentInfo_2014B_CCC.csv', headers: true) do |row|
     if row["code_module"] == "CCC" && row["code_presentation"] == "2014B"
         @create_student = User.create(name: "Student#{student_index}", email: "student#{student_index}@test.com", password: "student#{student_index}@test.com", student_id: row["id_student"])
         @create_course.users << @create_student
         @create_student.enrollments.update(role: "Student")
         student_index += 1
     end
-    if student_index == 12
+    if student_index == 25
         break
     end
 end
 
 # アクティビティ登録
-CSV.foreach('db/csv/vle_2014B_CCC.csv', headers: true) do |row|
+CSV.foreach('db/csv/2014B_CCC/vle_2014B_CCC.csv', headers: true) do |row|
     act_id = row["id_site"]
     if row["code_module"] == "CCC" && row["code_presentation"] == "2014B" && act_id.to_i > 729670 && act_id.to_i < 729845
         if row["week_from"] != "" && row["week_to"] != ""
@@ -45,7 +45,7 @@ CSV.foreach('db/csv/vle_2014B_CCC.csv', headers: true) do |row|
 end
 
 # # イベント登録
-CSV.foreach('db/csv/studentVle_2014B_CCC.csv', headers: true) do |row|
+CSV.foreach('db/csv/2014B_CCC/studentVle_2014B_CCC.csv', headers: true) do |row|
     act_id = row["id_site"]
     @find_student = User.find_by(student_id: row["id_student"])
     @find_activity = Activity.find_by(activity_id: row["id_site"])
