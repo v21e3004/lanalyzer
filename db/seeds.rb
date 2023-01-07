@@ -54,6 +54,7 @@ CSV.foreach('db/csv/2013J_EEE/studentVle_2013J_EEE.csv', headers: true) do |row|
         @find_event = Event.find_by(user_id: @find_student.id, activity_id: @find_activity.id, course_id: @create_course.id)
         if @find_event.nil?
             if @find_activity.date_to_start != nil
+                # fff
                 csv_submitted = row["date"]
                 submitted = date + 18 + csv_submitted.to_i
                 Event.create(user_id: @find_student.id, activity_id: @find_activity.id, course_id: @create_course.id, submitted_time: @start_time, action: "Submitted")
