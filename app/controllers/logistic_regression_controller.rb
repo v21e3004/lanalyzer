@@ -146,7 +146,7 @@ class LogisticRegressionController < ApplicationController
     students = users.joins(:enrollments).where(enrollments: {role: "Student"})
     all_activities = course.activities.where.not(date_to_submit: nil).where.not(date_to_start: nil)
     # latest_activities = all_activities[-2]
-    latest_activities = course.activities.find_by(activity_id: 729844)
+    latest_activities = course.activities.find_by(activity_id: 551024)
     students.each do |student|
       student_activities = student.events.find_by(activity_id: latest_activities.id)
       if student_activities.nil?
