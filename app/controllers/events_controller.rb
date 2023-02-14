@@ -7,30 +7,6 @@ class EventsController < ApplicationController
   
   def index
     send_summary_at_teacher()
-    # redirect_to root_path
-    # redirect_to "https://3.83.113.255/academicSessions"
-  # uri = URI.parse("https://3.83.113.255/learningdata/v1p1")
-  # request = Net::HTTP::Post.new(uri)
-  # request.content_type = "application/x-www-form-urlencoded"
-  # request["Authorization"] = "Basic bGFuYWx5emVyMDE6bGFuYWx5emVyMDI="
-  # request.set_form_data(
-  #   "grant_type" => "client_credentials",
-  #   "scope" => "https://purl.imsglobal.org/spec/or/v1p1/scope/resource.readonly"
-  #   # "scope" => "https: //purl.imsglobal.org/spec/or/v1p2/scope/gradebook.delete   "
-  # )
-  
-  # req_options = {
-  # use_ssl: uri.scheme == "https",
-  # verify_mode: OpenSSL::SSL::VERIFY_NONE,
-  # }
-  
-  # response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
-  #   http.request(request)
-  # end
-  
-  # result = JSON.parse(response.body)
-  # render :json => result
-    
   end
   
   def response_success
@@ -48,7 +24,6 @@ class EventsController < ApplicationController
         "icon" => "/icon.png"
       }
     })
-    
     req_options = {
       use_ssl: uri.scheme == "https",
     }
@@ -56,172 +31,6 @@ class EventsController < ApplicationController
       http.request(request)
     end
     puts "メッセージ送信 => #{student_id}"
-  end
-  
-  # submitted: 課題が提出された際のアルゴリズム
-  def submitted_extract_students(send_activity_name, send_course_code)
-    # ログイン中の教師が持つ授業のうち，focus: trueのものをモニタリング
-    # コース，アクティビティ，イベントの３つのテーブルを結合
-    courses_activities_events = Course.eager_load(activities: :events).where(courses: {focus: true})
-    courses_activities_events.each do |course|
-      if course.course_code == send_course_code
-        course.activities.each do |activity|
-          # message1 = "他の学生は#{activity.name}を提出済みです。取り組みましょう。"
-          # message2 = "他の学生は#{activity.name}を提出済みです。前回の授業で課題を提出できなかったので今回は提出しましょう。"
-          # 提出済み学生のイベント：提出がnilでない学生のレコード
-          submitted_user = User.joins(:events).where(events: {action: "Submitted"}).where(events: {activity_id: activity.id}).where(events: {course_id: course.id})
-          submitted_students = submitted_user.joins(:enrollments).where(enrollments: {role: "Student"})
-          submitted_students_num = submitted_students.count
-          # コースの教師
-          
-          # 未提出学生のイベント：提出がnilな学生のレコード
-          not_submitted_user = course.users.all
-          not_submitted_students = not_submitted_user.joins(:enrollments).where(enrollments: {role: "Student"})
-          send_message_students = not_submitted_students - submitted_students
-          not_submitted_students_all_num = not_submitted_students.count
-          not_submitted_students_num = not_submitted_students_all_num - submitted_students_num
-          all_students_num = submitted_students_num + not_submitted_students_num
-          # 2/3の学生数を取得：すべての学生人数を３で割った時の商を取得
-          # 例：４÷３＝1.333....の１をdivnum に代入
-          doubled = all_students_num * 2
-          divnum = doubled.div(3)
-          if divnum <= submitted_students_num && send_activity_name == activity.name && activity.sent_messages == false
-            send_message_students.each do |student|
-              # 過去に未提出の課題があるかどうかチェック
-              submitted_activities = student.events.distinct.pluck(:activity_id)
-              all_activities = Activity.distinct.pluck(:id)
-              check_activity = all_activities - submitted_activities
-              send_message_activity = []
-              check_activity.each do |set_id|
-                set = Activity.find_by(id: set_id)
-                send_message_activity.push(set.name)
-              end
-              if check_activity.empty? || send_activity_name == send_message_activity[0]
-                message = "他の学生は#{activity.name}を提出済みです。取り組みましょう。"
-              else
-                message = "他の学生は#{activity.name}を提出済みです。その他、過去に取り組んでいないアクティビティがあるので今回は提出しましょう。\n\n過去の課題：#{send_message_activity}"
-              end
-              send_student_id = student.student_id
-              send_course_name = course.name
-              # potifyにリクエスト
-              request_to_potify(send_student_id, send_course_name, message)
-              # アクティビティ未着手数が多い学生を教師に報告
-              if send_message_activity.length > 10
-                send_message_at_teacher(send_student_id, send_course_name, send_message_activity)
-              end
-            end
-            activity.update(sent_messages: true)
-            puts "メッセージを送信しました"
-          else
-            puts "メッセージ未送信"
-          end
-        end
-      end
-    end
-  end
-  
-  # viewed: 課題が提出された際のアルゴリズム
-  def viewed_extract_students(send_activity_name, send_course_code)
-     # ログイン中の教師が持つ授業のうち，focus: trueのものをモニタリング
-      # コース，アクティビティ，イベントの３つのテーブルを結合
-    courses_activities_events = Course.eager_load(activities: :events).where(courses: {focus: true})
-    courses_activities_events.each do |course|
-      if course.course_code == send_course_code
-        course.activities.each do |activity|
-          # message1 = "他の学生は#{activity.name}を提出済みです。取り組みましょう。"
-          # message2 = "他の学生は#{activity.name}を提出済みです。前回の授業で課題を提出できなかったので今回は提出しましょう。"
-          # 提出済み学生のイベント：提出がnilでない学生のレコード
-          submitted_user = User.joins(:events).where(events: {action: "Viewed"}).where(events: {activity_id: activity.id}).where(events: {course_id: course.id})
-          submitted_students = submitted_user.joins(:enrollments).where(enrollments: {role: "Student"})
-          submitted_students_num = submitted_students.count
-          # 未提出学生のイベント：提出がnilな学生のレコード
-          not_submitted_user = course.users.all
-          not_submitted_students = not_submitted_user.joins(:enrollments).where(enrollments: {role: "Student"})
-          send_message_students = not_submitted_students - submitted_students
-          not_submitted_students_all_num = not_submitted_students.count
-          not_submitted_students_num = not_submitted_students_all_num - submitted_students_num
-          all_students_num = submitted_students_num + not_submitted_students_num
-          # 2/3の学生数を取得：すべての学生人数を３で割った時の商を取得
-          # 例：４÷３＝1.333....の１をdivnum に代入
-          doubled = all_students_num * 2
-          divnum = doubled.div(3)
-          if divnum <= submitted_students_num && send_activity_name == activity.name && activity.sent_messages == false
-            send_message_students.each do |student|
-              # 過去に未提出の課題があるかどうかチェック
-              submitted_activities = student.events.distinct.pluck(:activity_id)
-              all_activities = Activity.distinct.pluck(:id)
-              check_activity = all_activities - submitted_activities
-              send_message_activity = []
-              check_activity.each do |set_id|
-                set = Activity.find_by(id: set_id)
-                send_message_activity.push(set.name)
-              end
-              if check_activity.empty? || send_activity_name == send_message_activity[0]
-                message = "他の学生は#{activity.name}を閲覧しています。取り組みましょう。"
-              else
-                message = "他の学生は#{activity.name}を閲覧しています。その他、過去に取り組んでいないアクティビティがあるので今回は提出しましょう。\n\n過去の課題：#{send_message_activity}"
-              end
-              
-              send_student_id = student.student_id
-              send_course_name = course.name
-        
-              request_to_potify(send_student_id, send_course_name, message)
-            end
-            activity.update(sent_messages: true)
-            puts "メッセージを送信しました"
-          else
-            puts "メッセージ未送信"
-          end
-        end
-      end
-    end
-  end
-  
-  # コースのアクティビティ着手状況の要約を教師に送信
-  def send_summary_at_teacher
-    # コースの教師
-    @send_teachers = User.joins(:enrollments).where(enrollments: {role: "Teacher"}).distinct
-    @message_body = ""
-    @activities_info = ""
-     # ログイン中の教師が持つ授業のうち，focus: trueのものをモニタリング
-    # コース，アクティビティ，イベントの３つのテーブルを結合
-    courses_activities_events = Course.eager_load(activities: :events).where(courses: {focus: true})
-    courses_activities_events.each do |course|
-      course.activities.each_with_index do |activity, i|
-        # 提出済み学生のイベント：提出がnilでない学生のレコード
-        submitted_user = User.joins(:events).where.not(events: {action: nil})
-        submitted_students = submitted_user.joins(:enrollments).where(enrollments: {role: "Student"})
-        # 未提出学生のイベント：提出がnilな学生のレコード
-        not_submitted_user = course.users.all
-        not_submitted_students = not_submitted_user.joins(:enrollments).where(enrollments: {role: "Student"})
-        send_message_students = not_submitted_students - submitted_students
-        
-        # ハッシュを配列化
-        student_array = send_message_students.pluck(:name)
-        @activities_info = @activities_info + "[#{activity.name}]\n未着手学生一覧：\n" + "#{student_array}\n\n"
-      end
-      message_summary = "【#{course.name}】\n" + @activities_info
-      @message_body = @message_body + message_summary
-    end
-    send_message = "複数のアクティビティを取り組んでいない学生一覧\n\n" + @message_body
-    
-    if !@send_teachers.nil?
-      @send_teachers.each do |techer|
-        request_to_potify(techer.student_id, "LAnalyzer", send_message)
-      end
-    end
-  end
-  
-  # 複数ののアクティビティを着手していない学生を教師に報告
-  def send_message_at_teacher(student_id, course_name, activities)
-    users = User.joins(:Courses).where(name: course_name)
-    @teachers = users.joins(:enrollments).where(enrollments: {role: "Teacher"}).distinct
-    message = "複数のアクティビティを着手していない学生\n\n学生ID:#{student_id}\nコース名：#{course_name}\nアクティビティ：#{activities}"
-     if !@send_teachers.nil?
-      @send_teachers.each do |techer|
-        request_to_potify(techer.student_id, "LAnalyzer", message)
-      end
-    end
   end
   
   # LogStoreのエンドポイント，必要なログをDBに保存
@@ -285,7 +94,7 @@ class EventsController < ApplicationController
           if event.nil?
             Event.create(user_id: find_student.id, submitted_time: access_time, activity_id: activity.id, course_id: find_course.id, action: "Submitted")
             puts "提出イベント作成"
-            # --------------------------------新しい期限付き課題作成と同時にロジスティック回帰モデルでωを計算---------------------------------------------------------------------------------------
+            # 新しい期限付き課題作成と同時にロジスティック回帰モデルでωを計算
             submitted_activities = find_course.activities.where.not(date_to_submit: nil).where.not(date_to_start: nil)
             submitted_activities_num = submitted_activities.count
             if submitted_activities_num > 1
@@ -296,10 +105,6 @@ class EventsController < ApplicationController
             puts "提出イベントアップデート"
           end
         end
-        # 閾値2/3アルゴリズムの呼び出し
-        # submitted_extract_students(activity_name, access_course)
-        # ロジスティック回帰モデルアルゴリズムの呼び出し
-        submitted_extract_students(activity.id, access_course)
         puts "Update submitted time"
         # action#Viewedの場合
       elsif strole == "http://purl.imsglobal.org/vocab/lis/v2/membership#Learner" && caliper_event["data"][0]["action"] == "http://purl.imsglobal.org/vocab/caliper/v1/action#Viewed" && !find_course.nil?
@@ -324,8 +129,6 @@ class EventsController < ApplicationController
           end
         end
         puts "Update view time"
-        # メソッド(アルゴリズム)の呼び出し
-        viewed_extract_students(activity_name, access_course)
       elsif strole == "http://purl.imsglobal.org/vocab/lis/v2/membership#Learner" && caliper_event["data"][0]["action"] != "http://purl.imsglobal.org/vocab/caliper/v1/action#Submitted" && caliper_event["data"][0]["action"] != "http://purl.imsglobal.org/vocab/caliper/v1/action#Viewed" && !find_course.nil?
         find_student = User.find_by(student_id: stid)
         find_student.events.update(submitted_time: access_time, action: "Access")

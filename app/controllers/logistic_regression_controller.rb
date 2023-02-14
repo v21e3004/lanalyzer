@@ -60,48 +60,6 @@ class LogisticRegressionController < ApplicationController
     raise
   end
   
-  # x学習ログの正規化
-  # def normalization_x(receive_course)
-  #   users_array = []
-  #   course = Course.find_by(id: receive_course.id)
-  #   users = course.users.all
-  #   students = users.joins(:enrollments).where(enrollments: {role: "Student"})
-  #   students_num = students.count
-  #   activities = course.activities.where.not(date_to_submit: nil).where.not(date_to_start: nil)
-  #   activities_num = activities.count
-  #   # 二次元配列初期化・アクティビティ毎の提出パーセントを配列に代入，代入後たしあわせて平均値を求める
-  #   activities_per_array = Array.new(activities_num) { Array.new(students_num,0) }
-  #   activities.each_with_index do |activity, i|
-  #     start_time = activity.date_to_start
-  #     end_time = activity.date_to_submit
-  #     # 分母
-  #     denominator = ((end_time - start_time) * 60 * 24).to_i
-  #     students.each_with_index do |student, j|
-  #       student_event = student.events.find_by(activity_id: activity.id)
-  #       if !student_event.nil?
-  #         student_submit_time = student_event.submitted_time
-  #         # 分子
-  #         if !student_submit_time.nil? && end_time > student_submit_time
-  #           numerator = ((end_time - student_submit_time) * 60 * 24).to_i
-  #         else
-  #           numerator = 0
-  #         end
-  #       else
-  #         numerator = 0
-  #       end
-  #       float = ((numerator.to_f / denominator.to_f) * 100.0).to_f
-  #       activities_per_array[i][j] = float
-  #     end
-  #   end
-  #   add = activities_per_array.transpose.map{|array| array.sum}
-  #   add.each do |value|
-  #     result = value / activities_num
-  #     users_array.push(result.to_i)
-  #   end
-  #   return users_array
-  # end
-  
-  
   # x学習ログの正規化(submitのみ)
   def normalization_x(receive_course)
     users_array = []
@@ -146,7 +104,7 @@ class LogisticRegressionController < ApplicationController
     students = users.joins(:enrollments).where(enrollments: {role: "Student"})
     all_activities = course.activities.where.not(date_to_submit: nil).where.not(date_to_start: nil)
     # latest_activities = all_activities[-2]
-    latest_activities = course.activities.find_by(activity_id: 551024)
+    latest_activities = course.activities.find_by(activity_id: 779270)
     students.each do |student|
       student_activities = student.events.find_by(activity_id: latest_activities.id)
       if student_activities.nil?
@@ -163,9 +121,6 @@ class LogisticRegressionController < ApplicationController
     x_array = normalization_x(receive_course)
     y_array = normalization_y(receive_course)
     p_array = normalization_p(receive_course)
-    # p x_array
-    # p y_array
-    # p p_array
     @data = Matrix.rows([x_array, y_array, p_array]).transpose
     return @data
   end
@@ -214,53 +169,14 @@ class LogisticRegressionController < ApplicationController
     p omegas
     students.each_with_index do |student, i|
       percent = 1.0 / (1.0 + Math.exp(-1 * (omegas[0] + (omegas[1] * x_array[i]) + (omegas[2] * y_array[i]))))
-      # percent = 1.0 / (1.0 + Math.exp(-1 * (omegas[0] + (omegas[1] * y_array[i]))))
       if percent >= 0.5 && percent < 1
         puts "メッセージ送信"
         p student.name
         p percent.to_i
-        # request_to_potify(student.student_id, course.name, message)
+        request_to_potify(student.student_id, course.name, message)
       elsif percent < 0.5 && percent > 0 && percent >= 1
         puts "未送信"
-        p student.name
-        p percent.to_i
       else
-        p student.name
-        p percent.to_i
-      end
-    end
-  end
-  
-  def index
-    # 説明(独立)変数と目的(従属)変数
-    # （ e.g.  n 行 3 列 (x, y..., p) )
-    course = Course.find_by(course_code: "AA0001")
-    users = course.users.all
-    students = users.joins(:enrollments).where(enrollments: {role: "Student"})
-    x_array = normalization_x(course)
-    y_array = normalization_y(course)
-    create_matrix(course)
-    puts "data ="
-    @data.to_a.each { |row| p row }
-    # ロジスティック回帰式の定数・係数計算(o0, o1, o2, ...)
-    puts "\nNow computing...\n\n"
-    # reg_logistic = reg_logistic(@data)
-    # reg_logistic = data.reg_logistic
-    omegas = [[-9.90274296996335, 5.0, 5.0]]
-    omegas = omegas.flatten
-    puts "omegas = "
-    p omegas
-    students.each_with_index do |student, i|
-      aaa = -1 * (omegas[0] + (omegas[1] * x_array[i]) + (omegas[2] * y_array[i]))
-      percent = 1.0 / (1.0 + Math.exp(aaa))
-      if percent > 0.5
-        puts "メッセージ送信"
-        p student.name
-        p percent
-      else
-        puts "未送信"
-        p student.name
-        p percent
       end
     end
   end

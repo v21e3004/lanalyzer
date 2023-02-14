@@ -14,7 +14,7 @@
                         => 送信済み
                     <% end %>
                </p>
-               <p>未提出学生：<% activity.events.each do |event|%>
+               <p>提出学生：<% activity.events.each do |event|%>
                     <ol>
                         <%= event.user.name %>
                         <%= event.submitted_time %>
@@ -29,11 +29,10 @@
                 <li>
                     <%= link_to course.name, "courses/#{course.id}/edit", method: :get %>
                     <%= link_to "削除", "courses/#{course.id}", method: :delete %><br>
-                    <%= button_to "テスト用", "logistic_regression/#{course.id}", method: :get %>
+                    <!--<%= button_to "テスト用", "logistic_regression/#{course.id}", method: :get %>-->
                 </li>
             <% end %><br>
         <%= button_to "授業を追加する", new_course_path, method: :get %><br>
-        
         
     <% elsif user.role == "Student"%>
     <p>学生: <%= current_user.name %></p>
